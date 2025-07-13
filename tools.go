@@ -20,7 +20,7 @@ type ListToolResponse struct {
 	NextCursor string `json:"nextCursor"`
 }
 
-func ToolsError(err error) map[string]any {
+func ToolsErrorText(err error) map[string]any {
 	return map[string]any{
 		"content": []map[string]string{
 			{
@@ -32,7 +32,7 @@ func ToolsError(err error) map[string]any {
 	}
 }
 
-func ToolsResponse(text string) map[string]any{
+func ToolsResponseText(text string) map[string]any{
 	return map[string]any{
 		"content": []map[string]string{
 			{

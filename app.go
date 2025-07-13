@@ -1,28 +1,30 @@
+// Package server implemets mcp http handler
 package server
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
-	"log"
 	"net/http"
 
 	"go.lsp.dev/jsonrpc2"
+	"go.uber.org/zap"
 )
 
 type Backend interface{
 	GetCapabilities() Capabilities 
 	ListTools() ListToolResponse
 	ToolsCall(*jsonrpc2.Call) map[string]any
+	ServerInfo() ServerInfo
 }
 type App struct{
 	backend Backend
+	log *zap.Logger
 }
 
-func NewApp(backend Backend) *App {
+func NewApp(backend Backend, log *zap.Logger) *App {
 	return &App{
 		backend : backend,
+		log: log,
 	}
 }
 
@@ -30,31 +32,21 @@ func (a *App) GetInitResponse() InitResponse{
 	return InitResponse{
 		ProtocolVersion: protocolVersion,
 		Capabilities: a.backend.GetCapabilities(),
-		ServerInfo: serverInfo,
+		ServerInfo: a.backend.ServerInfo(),
 		Instructions: "",
 	}
 }
 
 func (a *App) ServeHTTP(w http.ResponseWriter, r *http.Request){
 	call := jsonrpc2.Call{}
-	data, err := io.ReadAll(r.Body)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	log.Println(string(data))
-	if err := json.Unmarshal(data, &call); err != nil {
-		log.Println(err)
-		return
-	}
 	w.Header().Set("Content-Type", "application/json")
 	if err := a.mcpHandler(&call, w); err != nil{
-		log.Println(err)
-		// TODO: return http error
+		a.log.Error("mcp request failed", zap.String("method", call.Method()), zap.Error(err))
+		fmt.Fprint(w, http.StatusInternalServerError)
 	}
 }
 
-func (a *App)mcpHandler(call *jsonrpc2.Call,w http.ResponseWriter) error {
+func (a *App)mcpHandler(call *jsonrpc2.Call,w http.ResponseWriter) error{
 	method := call.Method()
 	var err error
 	var resp *jsonrpc2.Response
