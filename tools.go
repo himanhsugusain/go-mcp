@@ -1,22 +1,22 @@
 package server
 
-import(
+import (
 	"fmt"
 )
 
-type ToolParams struct{
-	Name string `json:"name"`
+type ToolParams struct {
+	Name      string            `json:"name"`
 	Arguments map[string]string `json:"arguments"`
 }
 type Tool struct {
-	Name string `json:"name"`
-	Title string `json:"title"`
-	Description string `json:"description"`
+	Name        string         `json:"name"`
+	Title       string         `json:"title"`
+	Description string         `json:"description"`
 	InputSchema map[string]any `json:"inputSchema"`
 }
 
 type ListToolResponse struct {
-	Tools []Tool `json:"tools"`
+	Tools      []Tool `json:"tools"`
 	NextCursor string `json:"nextCursor"`
 }
 
@@ -32,7 +32,7 @@ func ToolsErrorText(err error) map[string]any {
 	}
 }
 
-func ToolsResponseText(text string) map[string]any{
+func ToolsResponseText(text string) map[string]any {
 	return map[string]any{
 		"content": []map[string]string{
 			{
