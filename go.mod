@@ -1,4 +1,4 @@
-module github.com/himanshugusain/go-mcp
+module github.com/himanhsugusain/go-mcp
 
 go 1.23.10
 
